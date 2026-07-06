@@ -18,6 +18,8 @@ from tqdm import tqdm
 from saga import Scheduler
 from saga.schedulers.data import Dataset
 
+from sagaWrapperPython import CppHeftScheduler
+
 # Global variables for worker processes
 _worker_resultsdir: pathlib.Path
 _worker_schedulers: Dict[str, Scheduler]
@@ -67,10 +69,12 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
                     )
                     continue
 
-        schedule = scheduler.schedule(
-            network=instance.network, task_graph=instance.task_graph
-        )
-        makespan = schedule.makespan
+        # schedule = scheduler.schedule(
+        #     network=instance.network, task_graph=instance.task_graph
+        # )
+        scheduele = CppHeftScheduler().schedule(
+            network=instance.network, task_graph=instance.task_graph)
+        makespan = scheduele.makespan
         result = {
             "Dataset": dataset_name,
             "Instance": instance_name,
@@ -134,19 +138,30 @@ def evaluate_dataset(
         random.Random(seed).shuffle(work_items)
 
     # Run in parallel with progress bar
-    with Pool(
-        processes=num_workers,
-        initializer=_init_worker,
-        initargs=(resultsdir, schedulers),
-    ) as pool:
-        list(
-            tqdm(
-                pool.imap_unordered(_evaluate_instance, work_items),
-                total=len(work_items),
-                desc=f"Evaluating {dataset_name}",
-                unit="instance",
-            )
+    # with Pool(
+    #     processes= num_workers,
+    #     initializer=_init_worker,
+    #     initargs=(resultsdir, schedulers),
+    # ) as pool:
+    #     list(
+    #         tqdm(
+    #             pool.imap_unordered(_evaluate_instance, work_items),
+    #             total=len(work_items),
+    #             desc=f"Evaluating {dataset_name}",
+    #             unit="instance",
+    #         )
+    #     )
+    
+    # Serial execution for debugging
+    _init_worker(resultsdir, schedulers)
+    list(
+        tqdm(
+            map(_evaluate_instance, work_items),
+            total=len(work_items),
+            desc=f"Evaluating {dataset_name}",
+            unit="instance",
         )
+    )
 
 
 def main():
