@@ -21,6 +21,8 @@ from saga.schedulers import (
     WBAScheduler,
 )
 
+from sagaWrapperPython import CppHeftScheduler
+
 logging.basicConfig(level=logging.ERROR)
 
 thisdir = pathlib.Path(__file__).parent.resolve()
@@ -29,21 +31,22 @@ saga_schedulers = {
     # Schedulers included in benchmarking results for the paper
     # "Comparing Task Graph Scheduling Algorithms: An Adversarial Approach"
     # https://arxiv.org/abs/2403.07120
-    "BIL": BILScheduler(),
-    "CPoP": CpopScheduler(),
-    "Duplex": DuplexScheduler(),
-    "ETF": ETFScheduler(),
-    "FCP": FCPScheduler(),
-    "FLB": FLBScheduler(),
-    "FastestNode": FastestNodeScheduler(),
-    "GDL": GDLScheduler(),
+    # "BIL": BILScheduler(),
+    # "CPoP": CpopScheduler(),
+    # "Duplex": DuplexScheduler(),
+    # "ETF": ETFScheduler(),
+    # "FCP": FCPScheduler(),
+    # "FLB": FLBScheduler(),
+    # "FastestNode": FastestNodeScheduler(),
+    # "GDL": GDLScheduler(),
     "HEFT": HeftScheduler(),
-    "MCT": MCTScheduler(),
-    "MET": METScheduler(),
-    "MaxMin": MaxMinScheduler(),
-    "MinMin": MinMinScheduler(),
-    "OLB": OLBScheduler(),
-    "WBA": WBAScheduler(),
+    # "MCT": MCTScheduler(),
+    # "MET": METScheduler(),
+    # "MaxMin": MaxMinScheduler(),
+    # "MinMin": MinMinScheduler(),
+    # "OLB": OLBScheduler(),
+    # "WBA": WBAScheduler(),
+    "CppHEFT": CppHeftScheduler(),
 }
 
 exclude_datasets: Set[str] = {

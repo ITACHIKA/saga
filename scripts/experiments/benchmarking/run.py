@@ -69,12 +69,12 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
                     )
                     continue
 
-        # schedule = scheduler.schedule(
-        #     network=instance.network, task_graph=instance.task_graph
-        # )
-        scheduele = CppHeftScheduler().schedule(
-            network=instance.network, task_graph=instance.task_graph)
-        makespan = scheduele.makespan
+        schedule = scheduler.schedule(
+            network=instance.network, task_graph=instance.task_graph
+        )
+        # schedule = CppHeftScheduler().schedule(
+        #     network=instance.network, task_graph=instance.task_graph)
+        makespan = schedule.makespan
         result = {
             "Dataset": dataset_name,
             "Instance": instance_name,
