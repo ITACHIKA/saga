@@ -18,7 +18,7 @@ from tqdm import tqdm
 from saga import Scheduler
 from saga.schedulers.data import Dataset
 
-from sagaWrapperPython import CppHeftScheduler
+import pdb
 
 # Global variables for worker processes
 _worker_resultsdir: pathlib.Path
@@ -68,10 +68,16 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
                         scheduler_name,
                     )
                     continue
-
-        schedule = scheduler.schedule(
-            network=instance.network, task_graph=instance.task_graph
-        )
+        if(scheduler_name == "CppHEFT"):
+            schedule = scheduler.schedule(
+                network=instance.network, task_graph=instance.task_graph, extra_param = instance_name
+            )
+        else:
+            schedule = scheduler.schedule(
+                network=instance.network, task_graph=instance.task_graph
+            )
+        # print(scheduler_name)
+        # pdb.set_trace()
         # schedule = CppHeftScheduler().schedule(
         #     network=instance.network, task_graph=instance.task_graph)
         makespan = schedule.makespan
@@ -171,7 +177,7 @@ def main():
             logging.info("Skipping excluded dataset %s", dataset)
             continue
         logging.info("Evaluating dataset %s", dataset)
-        evaluate_dataset(resultsdir, dataset, overwrite=False)
+        evaluate_dataset(resultsdir, dataset, overwrite=True)
 
 
 if __name__ == "__main__":

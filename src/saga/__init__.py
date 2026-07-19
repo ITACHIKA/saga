@@ -739,7 +739,7 @@ class Scheduler(ABC, BaseModel):
     """An abstract class for a scheduler."""
 
     @abstractmethod
-    def schedule(self, network: Network, task_graph: TaskGraph) -> Schedule:
+    def schedule(self, network: Network, task_graph: TaskGraph, extra_param = None) -> Schedule:
         """Schedule the tasks on the network.
 
         Args:
