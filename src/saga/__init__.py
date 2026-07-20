@@ -745,6 +745,7 @@ class Scheduler(ABC, BaseModel):
         Args:
             network (Network): The network to schedule on.
             task_graph (TaskGraph): The task graph to schedule.
+            extra_param: An optional extra parameters for the scheduler that might need them.
 
         Returns:
             Schedule: The resulting schedule.

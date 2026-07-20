@@ -46,7 +46,9 @@ saga_schedulers = {
     # "MinMin": MinMinScheduler(),
     # "OLB": OLBScheduler(),
     # "WBA": WBAScheduler(),
-    "CppHEFT": CppHeftScheduler(),
+    # extra scheduler for CppHEFT using different configurations
+    "CppHEFTallCPU": CppHeftScheduler(), # default configuration uses all cpu
+    "CppHEFTmostSIMD": CppHeftScheduler(backend_configuration=["simd","simd","simd","cpu","simd","cpu","simd"]),
 }
 
 exclude_datasets: Set[str] = {

@@ -68,7 +68,7 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
                         scheduler_name,
                     )
                     continue
-        if(scheduler_name == "CppHEFT"):
+        if("CppHEFT" in scheduler_name): # special case for CppHEFT schedulers to allow extra params
             schedule = scheduler.schedule(
                 network=instance.network, task_graph=instance.task_graph, extra_param = instance_name
             )
