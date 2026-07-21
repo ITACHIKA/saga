@@ -47,8 +47,12 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
     savepath = _worker_resultsdir.joinpath(f"{dataset_name}.csv")
     lock_path = savepath.with_suffix(".csv.lock")
 
+    cpp_heft_repeats = 3
+
     results = []
     for scheduler_name, scheduler in _worker_schedulers.items():
+        schedules = [] # use a list to store the current scheduler's repeated runs
+        current_results = []
         # Check if already finished (with lock to avoid race condition)
         with filelock.FileLock(lock_path):
             if savepath.exists():
@@ -69,29 +73,37 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
                     )
                     continue
         if("CppHEFT" in scheduler_name): # special case for CppHEFT schedulers to allow extra params
-            schedule = scheduler.schedule(
-                network=instance.network, task_graph=instance.task_graph, extra_param = instance_name
-            )
+            extra_params = {}
+            extra_params["instance_name"] = instance_name
+            extra_params["scheduler_name"] = scheduler_name
+            for i in range(1,cpp_heft_repeats+1):
+                extra_params["repeats_id"] = i
+                schedules.append(scheduler.schedule(
+                    network=instance.network, task_graph=instance.task_graph, extra_param = extra_params
+                ))
         else:
-            schedule = scheduler.schedule(
+            schedules.append(scheduler.schedule(
                 network=instance.network, task_graph=instance.task_graph
-            )
+            ))
         # print(scheduler_name)
         # pdb.set_trace()
         # schedule = CppHeftScheduler().schedule(
         #     network=instance.network, task_graph=instance.task_graph)
-        makespan = schedule.makespan
-        result = {
-            "Dataset": dataset_name,
-            "Instance": instance_name,
-            "Scheduler": scheduler_name,
-            "Makespan": makespan,
-        }
-        results.append(result)
+        for repeat_id, schedule in enumerate(schedules, start=1):
+            makespan = schedule.makespan
+            result = {
+                "Dataset": dataset_name,
+                "Instance": instance_name,
+                "Scheduler": scheduler_name,
+                "Repeat": repeat_id,
+                "Makespan": makespan,
+            }
+            results.append(result)
+            current_results.append(result)
 
         # Write result immediately with lock
         with filelock.FileLock(lock_path):
-            result_df = pd.DataFrame([result])
+            result_df = pd.DataFrame(current_results)
             if savepath.exists():
                 result_df.to_csv(savepath, mode="a", header=False, index=False)
             else:
