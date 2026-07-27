@@ -62,11 +62,11 @@ exclude_datasets: Set[str] = {
     "srasearch",
     "blast",
     # exclude the following for testing purpose since cppHeft and Heft produce identical result
-    "etl",
-    "in_trees",
-    "out_trees",
-    "predict",
-    "stats"
+    # "etl",
+    # "in_trees",
+    # "out_trees",
+    # "predict",
+    # "stats"
 }
 
 datadir = thisdir.joinpath("data", "benchmarking")
