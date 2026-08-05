@@ -74,6 +74,7 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
                     continue
         if("CppHEFT" in scheduler_name): # special case for CppHEFT schedulers to allow extra params
             extra_params = {}
+            extra_params["dataset_name"] = dataset_name
             extra_params["instance_name"] = instance_name
             extra_params["scheduler_name"] = scheduler_name
             for i in range(1,cpp_heft_repeats+1):

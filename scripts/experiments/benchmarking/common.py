@@ -27,6 +27,30 @@ logging.basicConfig(level=logging.ERROR)
 
 thisdir = pathlib.Path(__file__).parent.resolve()
 
+# Kernel order: average computation, average inverse communication speed,
+# average communication, upward rank, parent-max reduction, EFT computation,
+# and argmin selection.
+cpp_heft_kernel_repetitions = [
+    1000,
+    10000,
+    1000,
+    100,
+    1000,
+    100,
+    1000,
+]
+
+cpp_heft_all_cpu_backends = ["cpu"] * 7
+cpp_heft_most_simd_backends = [
+    "simd",
+    "simd",
+    "simd",
+    "cpu",
+    "simd",
+    "cpu",
+    "simd",
+]
+
 saga_schedulers = {
     # Schedulers included in benchmarking results for the paper
     # "Comparing Task Graph Scheduling Algorithms: An Adversarial Approach"
@@ -47,8 +71,26 @@ saga_schedulers = {
     # "OLB": OLBScheduler(),
     # "WBA": WBAScheduler(),
     # extra scheduler for CppHEFT using different configurations
-    "CppHEFTallCPU": CppHeftScheduler(), # default configuration uses all cpu
-    "CppHEFTmostSIMD": CppHeftScheduler(backend_configuration=["simd","simd","simd","cpu","simd","cpu","simd"]),
+    "CppHEFTallCPU_Baseline": CppHeftScheduler(
+        backend_configuration=cpp_heft_all_cpu_backends,
+        performance_mode="baseline",
+        kernel_repetitions=cpp_heft_kernel_repetitions,
+    ),
+    "CppHEFTallCPU_Profile": CppHeftScheduler(
+        backend_configuration=cpp_heft_all_cpu_backends,
+        performance_mode="kernel_profile",
+        kernel_repetitions=cpp_heft_kernel_repetitions,
+    ),
+    "CppHEFTmostSIMD_Baseline": CppHeftScheduler(
+        backend_configuration=cpp_heft_most_simd_backends,
+        performance_mode="baseline",
+        kernel_repetitions=cpp_heft_kernel_repetitions,
+    ),
+    "CppHEFTmostSIMD_Profile": CppHeftScheduler(
+        backend_configuration=cpp_heft_most_simd_backends,
+        performance_mode="kernel_profile",
+        kernel_repetitions=cpp_heft_kernel_repetitions,
+    ),
 }
 
 exclude_datasets: Set[str] = {
