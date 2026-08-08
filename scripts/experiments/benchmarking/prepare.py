@@ -22,72 +22,169 @@ from saga.schedulers.data.riotbench import (
 from saga.schedulers.data.wfcommons import get_networks, get_workflows
 
 
-def in_trees_dataset(ccr: Optional[float] = None, overwrite: bool = False) -> Dataset:
+def _uses_fixed_configuration(**parameters: Optional[int]) -> bool:
+    """Validate an optional all-or-none fixed graph configuration."""
+    specified = [value is not None for value in parameters.values()]
+    if any(specified) and not all(specified):
+        missing = [name for name, value in parameters.items() if value is None]
+        raise ValueError(
+            "Fixed graph configuration is incomplete; missing: "
+            + ", ".join(missing)
+        )
+    if all(specified):
+        invalid = [
+            name
+            for name, value in parameters.items()
+            if value is not None and value <= 0
+        ]
+        if invalid:
+            raise ValueError(
+                "Fixed graph configuration values must be positive: "
+                + ", ".join(invalid)
+            )
+        return True
+    return False
+
+
+def in_trees_dataset(
+    ccr: Optional[float] = None,
+    level: Optional[int] = None,
+    branch: Optional[int] = None,
+    nodes: Optional[int] = None,
+    num_instances: Optional[int] = None,
+    overwrite: bool = False,
+) -> Dataset:
     """Generate the in_trees dataset.
 
     Args:
         ccr: The communication to computation ratio.
         overwrite: Whether to overwrite existing instances.
+        level: The levels of the in-trees.
+        branch: The branching factors of the in-trees.
+        nodes: The number of nodes in the networks.
+        num_instances: Number of instances. Defaults to 100 in random mode and
+            20 in fixed-configuration mode.
 
     Returns:
         Dataset: The generated dataset.
     """
-    dataset_name = f"in_trees_ccr_{ccr}" if ccr is not None else "in_trees"
+    fixed_configuration = _uses_fixed_configuration(
+        level=level,
+        branch=branch,
+        nodes=nodes,
+    )
+    if num_instances is None:
+        num_instances = 20 if fixed_configuration else 100
+    if num_instances <= 0:
+        raise ValueError("num_instances must be positive")
+    if ccr is not None and ccr <= 0:
+        raise ValueError("ccr must be positive")
+
+    if fixed_configuration:
+        assert level is not None and branch is not None and nodes is not None
+        dataset_name = f"in_trees_l{level}_b{branch}_n{nodes}"
+    else:
+        dataset_name = f"in_trees_ccr_{ccr}" if ccr is not None else "in_trees"
+    if fixed_configuration and ccr is not None:
+        dataset_name += f"_ccr_{ccr}"
+
     dataset = Dataset(name=dataset_name)
-
-    num_instances = 100
-    min_levels, max_levels = 2, 4
-    min_branching, max_branching = 2, 3
-    min_nodes, max_nodes = 3, 5
-    existing_instances = set(dataset.instances) if not overwrite else set()
-    for i in range(num_instances):
-        intance_name = f"{dataset_name}_{i}"
-        if intance_name in existing_instances:
-            continue
-        network = gen_random_networks(
-            num=1, num_nodes=random.randint(min_nodes, max_nodes)
-        )[0]
-        task_graph = gen_in_trees(
-            num=1,
-            num_levels=random.randint(min_levels, max_levels),
-            branching_factor=random.randint(min_branching, max_branching),
-        )[0]
-        if ccr is not None:
-            network = network.scale_to_ccr(task_graph, ccr)
-        dataset.save_instance(
-            ProblemInstance(name=intance_name, network=network, task_graph=task_graph)
-        )
-    return dataset
-
-
-def out_trees_dataset(ccr: Optional[float] = None, overwrite: bool = False) -> Dataset:
-    """Generate the out_trees dataset.
-
-    Args:
-        ccr: The communication to computation ratio.
-        overwrite: Whether to overwrite existing instances.
-
-    Returns:
-        Dataset: The generated dataset.
-    """
-    dataset_name = f"out_trees_ccr_{ccr}" if ccr is not None else "out_trees"
-    dataset = Dataset(name=dataset_name)
-    num_instances = 100
-    min_levels, max_levels = 2, 4
-    min_branching, max_branching = 2, 3
-    min_nodes, max_nodes = 3, 5
     existing_instances = set(dataset.instances) if not overwrite else set()
     for i in range(num_instances):
         instance_name = f"{dataset_name}_{i}"
         if instance_name in existing_instances:
             continue
-        network = gen_random_networks(
-            num=1, num_nodes=random.randint(min_nodes, max_nodes)
+
+        if fixed_configuration:
+            processor_count = nodes
+            num_levels = level
+            branching_factor = branch
+        else:
+            processor_count = random.randint(3, 5)
+            num_levels = random.randint(2, 4)
+            branching_factor = random.randint(2, 3)
+
+        network = gen_random_networks(num=1, num_nodes=processor_count)[0]
+        task_graph = gen_in_trees(
+            num=1,
+            num_levels=num_levels,
+            branching_factor=branching_factor,
         )[0]
+        if ccr is not None:
+            network = network.scale_to_ccr(task_graph, ccr)
+        dataset.save_instance(
+            ProblemInstance(
+                name=instance_name,
+                network=network,
+                task_graph=task_graph,
+            )
+        )
+    return dataset
+
+
+def out_trees_dataset(
+    ccr: Optional[float] = None,
+    level: Optional[int] = None,
+    branch: Optional[int] = None,
+    nodes: Optional[int] = None,
+    num_instances: Optional[int] = None,
+    overwrite: bool = False,
+) -> Dataset:
+    """Generate the out_trees dataset.
+
+    Args:
+        ccr: The communication to computation ratio.
+        level: The levels of the out-trees.
+        branch: The branching factors of the out-trees.
+        nodes: The number of nodes in the networks.
+        num_instances: Number of instances. Defaults to 100 in random mode and
+            20 in fixed-configuration mode.
+        overwrite: Whether to overwrite existing instances.
+
+    Returns:
+        Dataset: The generated dataset.
+    """
+    fixed_configuration = _uses_fixed_configuration(
+        level=level,
+        branch=branch,
+        nodes=nodes,
+    )
+    if num_instances is None:
+        num_instances = 20 if fixed_configuration else 100
+    if num_instances <= 0:
+        raise ValueError("num_instances must be positive")
+    if ccr is not None and ccr <= 0:
+        raise ValueError("ccr must be positive")
+
+    if fixed_configuration:
+        assert level is not None and branch is not None and nodes is not None
+        dataset_name = f"out_trees_l{level}_b{branch}_n{nodes}"
+    else:
+        dataset_name = f"out_trees_ccr_{ccr}" if ccr is not None else "out_trees"
+    if fixed_configuration and ccr is not None:
+        dataset_name += f"_ccr_{ccr}"
+
+    dataset = Dataset(name=dataset_name)
+    existing_instances = set(dataset.instances) if not overwrite else set()
+    for i in range(num_instances):
+        instance_name = f"{dataset_name}_{i}"
+        if instance_name in existing_instances:
+            continue
+
+        if fixed_configuration:
+            processor_count = nodes
+            num_levels = level
+            branching_factor = branch
+        else:
+            processor_count = random.randint(3, 5)
+            num_levels = random.randint(2, 4)
+            branching_factor = random.randint(2, 3)
+
+        network = gen_random_networks(num=1, num_nodes=processor_count)[0]
         task_graph = gen_out_trees(
             num=1,
-            num_levels=random.randint(min_levels, max_levels),
-            branching_factor=random.randint(min_branching, max_branching),
+            num_levels=num_levels,
+            branching_factor=branching_factor,
         )[0]
         if ccr is not None:
             network = network.scale_to_ccr(task_graph, ccr)
@@ -97,35 +194,73 @@ def out_trees_dataset(ccr: Optional[float] = None, overwrite: bool = False) -> D
     return dataset
 
 
-def chains_dataset(ccr: Optional[float] = None, overwrite: bool = False) -> Dataset:
+def chains_dataset(
+    ccr: Optional[float] = None,
+    num_chains: Optional[int] = None,
+    chain_length: Optional[int] = None,
+    nodes: Optional[int] = None,
+    num_instances: Optional[int] = None,
+    overwrite: bool = False,
+) -> Dataset:
     """Generate the chains dataset.
 
     Args:
         ccr: The communication to computation ratio.
+        num_chains: Number of parallel chains.
+        chain_length: Number of tasks in each parallel chain.
+        nodes: The number of nodes in the networks.
+        num_instances: Number of instances. Defaults to 100 in random mode and
+            20 in fixed-configuration mode.
         overwrite: Whether to overwrite existing instances.
 
     Returns:
         Dataset: The generated dataset.
     """
-    dataset_name = f"chains_ccr_{ccr}" if ccr is not None else "chains"
-    dataset = Dataset(name=dataset_name)
+    fixed_configuration = _uses_fixed_configuration(
+        num_chains=num_chains,
+        chain_length=chain_length,
+        nodes=nodes,
+    )
+    if num_instances is None:
+        num_instances = 20 if fixed_configuration else 100
+    if num_instances <= 0:
+        raise ValueError("num_instances must be positive")
+    if ccr is not None and ccr <= 0:
+        raise ValueError("ccr must be positive")
 
-    num_instances = 100
-    min_chains, max_chains = 2, 5
-    min_chain_length, max_chain_length = 2, 5
-    min_nodes, max_nodes = 3, 5
+    if fixed_configuration:
+        assert (
+            num_chains is not None
+            and chain_length is not None
+            and nodes is not None
+        )
+        dataset_name = f"chains_c{num_chains}_l{chain_length}_n{nodes}"
+    else:
+        dataset_name = f"chains_ccr_{ccr}" if ccr is not None else "chains"
+    if fixed_configuration and ccr is not None:
+        dataset_name += f"_ccr_{ccr}"
+
+    dataset = Dataset(name=dataset_name)
     existing_instances = set(dataset.instances) if not overwrite else set()
     for i in range(num_instances):
         instance_name = f"{dataset_name}_{i}"
         if instance_name in existing_instances:
             continue
-        network = gen_random_networks(
-            num=1, num_nodes=random.randint(min_nodes, max_nodes)
-        )[0]
+
+        if fixed_configuration:
+            processor_count = nodes
+            current_num_chains = num_chains
+            current_chain_length = chain_length
+        else:
+            processor_count = random.randint(3, 5)
+            current_num_chains = random.randint(2, 5)
+            current_chain_length = random.randint(2, 5)
+
+        network = gen_random_networks(num=1, num_nodes=processor_count)[0]
         task_graph = gen_parallel_chains(
             num=1,
-            num_chains=random.randint(min_chains, max_chains),
-            chain_length=random.randint(min_chain_length, max_chain_length),
+            num_chains=current_num_chains,
+            chain_length=current_chain_length,
         )[0]
         if ccr is not None:
             network = network.scale_to_ccr(task_graph, ccr)
