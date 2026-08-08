@@ -84,9 +84,9 @@ def in_trees_dataset(
         assert level is not None and branch is not None and nodes is not None
         dataset_name = f"in_trees_l{level}_b{branch}_n{nodes}"
     else:
-        dataset_name = f"in_trees_ccr_{ccr}" if ccr is not None else "in_trees"
+        dataset_name = f"in_trees_ccr{ccr}" if ccr is not None else "in_trees"
     if fixed_configuration and ccr is not None:
-        dataset_name += f"_ccr_{ccr}"
+        dataset_name += f"_ccr{ccr}"
 
     dataset = Dataset(name=dataset_name)
     existing_instances = set(dataset.instances) if not overwrite else set()
@@ -160,9 +160,9 @@ def out_trees_dataset(
         assert level is not None and branch is not None and nodes is not None
         dataset_name = f"out_trees_l{level}_b{branch}_n{nodes}"
     else:
-        dataset_name = f"out_trees_ccr_{ccr}" if ccr is not None else "out_trees"
+        dataset_name = f"out_trees_ccr{ccr}" if ccr is not None else "out_trees"
     if fixed_configuration and ccr is not None:
-        dataset_name += f"_ccr_{ccr}"
+        dataset_name += f"_ccr{ccr}"
 
     dataset = Dataset(name=dataset_name)
     existing_instances = set(dataset.instances) if not overwrite else set()
@@ -236,9 +236,9 @@ def chains_dataset(
         )
         dataset_name = f"chains_c{num_chains}_l{chain_length}_n{nodes}"
     else:
-        dataset_name = f"chains_ccr_{ccr}" if ccr is not None else "chains"
+        dataset_name = f"chains_ccr{ccr}" if ccr is not None else "chains"
     if fixed_configuration and ccr is not None:
-        dataset_name += f"_ccr_{ccr}"
+        dataset_name += f"_ccr{ccr}"
 
     dataset = Dataset(name=dataset_name)
     existing_instances = set(dataset.instances) if not overwrite else set()
@@ -385,9 +385,21 @@ def prepare_datasets(overwrite: bool = False, num_workers: int = num_processors)
     tasks: List[Tuple[str, dict]] = []
 
     # Random Graphs
-    tasks.append(("in_trees", {"overwrite": overwrite}))
-    tasks.append(("out_trees", {"overwrite": overwrite}))
-    tasks.append(("chains", {"overwrite": overwrite}))
+    # DAG size scaling dataset, processor number is fixed to 8 and fixed CCR 1
+    tasks.append(("in_trees", {"overwrite": overwrite, "level":6, "branch":2, "nodes": 8, "ccr": 1})) # 128 tasks
+    tasks.append(("in_trees", {"overwrite": overwrite, "level":8, "branch":2, "nodes": 8, "ccr": 1})) # 512 tasks
+    tasks.append(("in_trees", {"overwrite": overwrite, "level":10, "branch":2, "nodes": 8, "ccr": 1})) # 2048 tasks
+    tasks.append(("in_trees", {"overwrite": overwrite, "level":12, "branch":2, "nodes": 8, "ccr": 1})) # 8192 tasks
+    
+    tasks.append(("out_trees", {"overwrite": overwrite, "level":6, "branch":2, "nodes": 8, "ccr": 1})) # 128 tasks
+    tasks.append(("out_trees", {"overwrite": overwrite, "level":8, "branch":2, "nodes": 8, "ccr": 1})) # 512 tasks
+    tasks.append(("out_trees", {"overwrite": overwrite, "level":10, "branch":2, "nodes": 8, "ccr": 1})) # 2048 tasks
+    tasks.append(("out_trees", {"overwrite": overwrite, "level":12, "branch":2, "nodes": 8, "ccr": 1})) # 8192 tasks
+    
+    tasks.append(("chains", {"overwrite": overwrite, "num_chains": 8, "chain_length": 16, "nodes": 8, "ccr": 1})) # 130 tasks
+    tasks.append(("chains", {"overwrite": overwrite, "num_chains": 8, "chain_length": 64, "nodes": 8, "ccr": 1})) # 514 tasks
+    tasks.append(("chains", {"overwrite": overwrite, "num_chains": 8, "chain_length": 256, "nodes": 8, "ccr": 1})) # 2050 tasks
+    tasks.append(("chains", {"overwrite": overwrite, "num_chains": 8, "chain_length": 1024, "nodes": 8, "ccr": 1})) # 8194 tasks
 
     # Riotbench
     tasks.append(("riotbench_etl", {"overwrite": overwrite}))
@@ -427,7 +439,7 @@ def prepare_datasets(overwrite: bool = False, num_workers: int = num_processors)
 
 
 def main():
-    prepare_datasets(overwrite=False)
+    prepare_datasets(overwrite=True)
 
 
 if __name__ == "__main__":
