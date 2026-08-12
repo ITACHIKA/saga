@@ -58,21 +58,45 @@ saga_schedulers = {
     # "OLB": OLBScheduler(),
     # "WBA": WBAScheduler(),
     # extra scheduler for CppHEFT using different configurations
-    "CppHEFTallCPU_Baseline": CppHeftScheduler(
+    "CppHEFTallCPU_PhaseOnly_FullStats": CppHeftScheduler(
         backend_configuration=cpp_heft_all_cpu_backends,
-        performance_mode="baseline",
+        measurement_region="phase_profile",
+        measurement_mode="full_stats",
     ),
-    "CppHEFTallCPU_Profile": CppHeftScheduler(
+    "CppHEFTallCPU_PhaseOnly_TimeOnly": CppHeftScheduler(
         backend_configuration=cpp_heft_all_cpu_backends,
-        performance_mode="kernel_profile",
+        measurement_region="phase_profile",
+        measurement_mode="time_only",
     ),
-    "CppHEFTmostSIMD_Baseline": CppHeftScheduler(
-        backend_configuration=cpp_heft_most_simd_backends,
-        performance_mode="baseline",
+    "CppHEFTallCPU_Kernel_FullStats": CppHeftScheduler(
+        backend_configuration=cpp_heft_all_cpu_backends,
+        measurement_region="kernel_profile",
+        measurement_mode="full_stats",
     ),
-    "CppHEFTmostSIMD_Profile": CppHeftScheduler(
+    "CppHEFTallCPU_Kernel_TimeOnly": CppHeftScheduler(
+        backend_configuration=cpp_heft_all_cpu_backends,
+        measurement_region="kernel_profile",
+        measurement_mode="time_only",
+    ),
+    "CppHEFTmostSIMD_PhaseOnly_FullStats": CppHeftScheduler(
         backend_configuration=cpp_heft_most_simd_backends,
-        performance_mode="kernel_profile",
+        measurement_region="phase_profile",
+        measurement_mode="full_stats",
+    ),
+    "CppHEFTmostSIMD_PhaseOnly_TimeOnly": CppHeftScheduler(
+        backend_configuration=cpp_heft_most_simd_backends,
+        measurement_region="phase_profile",
+        measurement_mode="time_only",
+    ),
+    "CppHEFTmostSIMD_Kernel_FullStats": CppHeftScheduler(
+        backend_configuration=cpp_heft_most_simd_backends,
+        measurement_region="kernel_profile",
+        measurement_mode="full_stats",
+    ),
+    "CppHEFTmostSIMD_Kernel_TimeOnly": CppHeftScheduler(
+        backend_configuration=cpp_heft_most_simd_backends,
+        measurement_region="kernel_profile",
+        measurement_mode="time_only",
     ),
 }
 
