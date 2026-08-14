@@ -24,7 +24,6 @@ import pdb
 _worker_resultsdir: pathlib.Path
 _worker_schedulers: Dict[str, Scheduler]
 
-
 def _init_worker(results_dir: pathlib.Path, schedulers: Dict[str, Scheduler]):
     """Initialize worker process with shared state."""
     global _worker_resultsdir, _worker_schedulers
@@ -182,15 +181,27 @@ def evaluate_dataset(
         )
     )
 
+# A temporary list of datasets to include in the benchmarking. Mostly for selecting a few DS for testing purpose.
+# If empty, dataset include and exclude will follow common.py's list
+include_datasets: List[str] = [
+    "in_trees_l6_b2_n8_ccr1",
+    "in_trees_l8_b2_n8_ccr1",
+    "in_trees_l10_b2_n8_ccr1",
+]
 
 def main():
     datasets = [path.name for path in datadir.iterdir() if path.is_dir()]
-    for dataset in datasets:
-        if dataset in exclude_datasets:
-            logging.info("Skipping excluded dataset %s", dataset)
-            continue
-        logging.info("Evaluating dataset %s", dataset)
-        evaluate_dataset(resultsdir, dataset, overwrite=True)
+    if include_datasets is not None:
+        for dataset in include_datasets:
+            logging.info("Evaluating dataset %s", dataset)
+            evaluate_dataset(resultsdir, dataset, overwrite=True)
+    else:
+        for dataset in datasets:
+            if dataset in exclude_datasets:
+                logging.info("Skipping excluded dataset %s", dataset)
+                continue
+            logging.info("Evaluating dataset %s", dataset)
+            evaluate_dataset(resultsdir, dataset, overwrite=True)
 
 
 if __name__ == "__main__":

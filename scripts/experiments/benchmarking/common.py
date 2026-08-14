@@ -63,6 +63,11 @@ saga_schedulers = {
         measurement_region="phase_profile",
         measurement_mode="full_stats",
     ),
+    "CppHEFTallCPU_PhaseOnly_FullStatsRDPMC": CppHeftScheduler(
+        backend_configuration=cpp_heft_all_cpu_backends,
+        measurement_region="phase_profile",
+        measurement_mode="full_stats_rdpmc",
+    ),
     "CppHEFTallCPU_PhaseOnly_TimeOnly": CppHeftScheduler(
         backend_configuration=cpp_heft_all_cpu_backends,
         measurement_region="phase_profile",
@@ -72,6 +77,11 @@ saga_schedulers = {
         backend_configuration=cpp_heft_all_cpu_backends,
         measurement_region="kernel_profile",
         measurement_mode="full_stats",
+    ),
+    "CppHEFTallCPU_Kernel_FullStatsRDPMC": CppHeftScheduler(
+        backend_configuration=cpp_heft_all_cpu_backends,
+        measurement_region="kernel_profile",
+        measurement_mode="full_stats_rdpmc",
     ),
     "CppHEFTallCPU_Kernel_TimeOnly": CppHeftScheduler(
         backend_configuration=cpp_heft_all_cpu_backends,
@@ -83,6 +93,11 @@ saga_schedulers = {
         measurement_region="phase_profile",
         measurement_mode="full_stats",
     ),
+    "CppHEFTmostSIMD_PhaseOnly_FullStatsRDPMC": CppHeftScheduler(
+        backend_configuration=cpp_heft_most_simd_backends,
+        measurement_region="phase_profile",
+        measurement_mode="full_stats_rdpmc",
+    ),
     "CppHEFTmostSIMD_PhaseOnly_TimeOnly": CppHeftScheduler(
         backend_configuration=cpp_heft_most_simd_backends,
         measurement_region="phase_profile",
@@ -92,6 +107,11 @@ saga_schedulers = {
         backend_configuration=cpp_heft_most_simd_backends,
         measurement_region="kernel_profile",
         measurement_mode="full_stats",
+    ),
+    "CppHEFTmostSIMD_Kernel_FullStatsRDPMC": CppHeftScheduler(
+        backend_configuration=cpp_heft_most_simd_backends,
+        measurement_region="kernel_profile",
+        measurement_mode="full_stats_rdpmc",
     ),
     "CppHEFTmostSIMD_Kernel_TimeOnly": CppHeftScheduler(
         backend_configuration=cpp_heft_most_simd_backends,
@@ -112,8 +132,8 @@ exclude_datasets: Set[str] = {
     "blast",
     # exclude the following for testing purpose since cppHeft and Heft produce identical result
     # "in_trees",
-    # "out_trees",
-    # "chains",
+    "out_trees",
+    "chains",
     "predict",
     "stats",
     "train",
