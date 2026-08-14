@@ -191,7 +191,7 @@ include_datasets: List[str] = [
 
 def main():
     datasets = [path.name for path in datadir.iterdir() if path.is_dir()]
-    if include_datasets is not None:
+    if include_datasets is not None and len(include_datasets) > 0:
         for dataset in include_datasets:
             logging.info("Evaluating dataset %s", dataset)
             evaluate_dataset(resultsdir, dataset, overwrite=True)
