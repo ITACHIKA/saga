@@ -388,11 +388,11 @@ def prepare_datasets(overwrite: bool = False, num_workers: int = num_processors)
     # DAG size scaling dataset, processor number is fixed to 8 and fixed CCR 1
     tasks.append(("in_trees", {"overwrite": overwrite, "level":6, "branch":2, "nodes": 8, "ccr": 1})) # 128 tasks
     tasks.append(("in_trees", {"overwrite": overwrite, "level":8, "branch":2, "nodes": 8, "ccr": 1})) # 512 tasks
-    tasks.append(("in_trees", {"overwrite": overwrite, "level":9, "branch":2, "nodes": 8, "ccr": 1})) # 1024 tasks
+    # tasks.append(("in_trees", {"overwrite": overwrite, "level":9, "branch":2, "nodes": 8, "ccr": 1})) # 1024 tasks
     tasks.append(("in_trees", {"overwrite": overwrite, "level":10, "branch":2, "nodes": 8, "ccr": 1})) # 2048 tasks
-    tasks.append(("in_trees", {"overwrite": overwrite, "level":11, "branch":2, "nodes": 8, "ccr": 1})) # 4096 tasks
+    # tasks.append(("in_trees", {"overwrite": overwrite, "level":11, "branch":2, "nodes": 8, "ccr": 1})) # 4096 tasks
     tasks.append(("in_trees", {"overwrite": overwrite, "level":12, "branch":2, "nodes": 8, "ccr": 1})) # 8192 tasks
-    tasks.append(("in_trees", {"overwrite": overwrite, "level":13, "branch":2, "nodes": 8, "ccr": 1})) # 16384 tasks
+    # tasks.append(("in_trees", {"overwrite": overwrite, "level":13, "branch":2, "nodes": 8, "ccr": 1})) # 16384 tasks
     
     tasks.append(("out_trees", {"overwrite": overwrite, "level":6, "branch":2, "nodes": 8, "ccr": 1})) # 128 tasks
     tasks.append(("out_trees", {"overwrite": overwrite, "level":8, "branch":2, "nodes": 8, "ccr": 1})) # 512 tasks

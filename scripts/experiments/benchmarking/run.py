@@ -184,9 +184,9 @@ def evaluate_dataset(
 # A temporary list of datasets to include in the benchmarking. Mostly for selecting a few DS for testing purpose.
 # If empty, dataset include and exclude will follow common.py's list
 include_datasets: List[str] = [
-    "in_trees_l6_b2_n8_ccr1",
-    "in_trees_l8_b2_n8_ccr1",
-    "in_trees_l10_b2_n8_ccr1",
+    # "in_trees_l6_b2_n8_ccr1",
+    # "in_trees_l8_b2_n8_ccr1",
+    # "in_trees_l10_b2_n8_ccr1",
 ]
 
 def main():

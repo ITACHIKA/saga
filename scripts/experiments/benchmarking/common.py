@@ -132,8 +132,8 @@ exclude_datasets: Set[str] = {
     "blast",
     # exclude the following for testing purpose since cppHeft and Heft produce identical result
     # "in_trees",
-    "out_trees",
-    "chains",
+    # "out_trees",
+    # "chains",
     "predict",
     "stats",
     "train",
