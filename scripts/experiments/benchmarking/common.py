@@ -28,6 +28,14 @@ logging.basicConfig(level=logging.ERROR)
 thisdir = pathlib.Path(__file__).parent.resolve()
 
 cpp_heft_all_cpu_backends = ["cpu"] * 7
+cpp_heft_cpu_eftOptimized_backends = [
+    "cpu",
+    "cpu",
+    "cpu",
+    "cpu",
+    "cpu",
+    "cpu_optimized",
+    "cpu",]
 cpp_heft_most_simd_backends = [
     "simd",
     "simd",
@@ -58,65 +66,76 @@ saga_schedulers = {
     # "OLB": OLBScheduler(),
     # "WBA": WBAScheduler(),
     # extra scheduler for CppHEFT using different configurations
-    "CppHEFTallCPU_PhaseOnly_FullStats": CppHeftScheduler(
-        backend_configuration=cpp_heft_all_cpu_backends,
-        measurement_region="phase_profile",
-        measurement_mode="full_stats",
-    ),
-    "CppHEFTallCPU_PhaseOnly_FullStatsRDPMC": CppHeftScheduler(
-        backend_configuration=cpp_heft_all_cpu_backends,
-        measurement_region="phase_profile",
-        measurement_mode="full_stats_rdpmc",
-    ),
-    "CppHEFTallCPU_PhaseOnly_TimeOnly": CppHeftScheduler(
-        backend_configuration=cpp_heft_all_cpu_backends,
-        measurement_region="phase_profile",
-        measurement_mode="time_only",
-    ),
-    "CppHEFTallCPU_Kernel_FullStats": CppHeftScheduler(
-        backend_configuration=cpp_heft_all_cpu_backends,
-        measurement_region="kernel_profile",
-        measurement_mode="full_stats",
-    ),
+    # "CppHEFTallCPU_PhaseOnly_FullStats": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_all_cpu_backends,
+    #     measurement_region="phase_profile",
+    #     measurement_mode="full_stats",
+    # ),
+    # "CppHEFTallCPU_PhaseOnly_FullStatsRDPMC": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_all_cpu_backends,
+    #     measurement_region="phase_profile",
+    #     measurement_mode="full_stats_rdpmc",
+    # ),
+    # "CppHEFTallCPU_PhaseOnly_TimeOnly": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_all_cpu_backends,
+    #     measurement_region="phase_profile",
+    #     measurement_mode="time_only",
+    # ),
+    # "CppHEFTallCPU_Kernel_FullStats": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_all_cpu_backends,
+    #     measurement_region="kernel_profile",
+    #     measurement_mode="full_stats",
+    # ),
+    # "CppHEFTallCPU_Kernel_FullStatsRDPMC": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_all_cpu_backends,
+    #     measurement_region="kernel_profile",
+    #     measurement_mode="full_stats_rdpmc",
+    # ),
+    # "CppHEFTallCPU_Kernel_TimeOnly": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_all_cpu_backends,
+    #     measurement_region="kernel_profile",
+    #     measurement_mode="time_only",
+    # ),
+    # "CppHEFTmostSIMD_PhaseOnly_FullStats": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_most_simd_backends,
+    #     measurement_region="phase_profile",
+    #     measurement_mode="full_stats",
+    # ),
+    # "CppHEFTmostSIMD_PhaseOnly_FullStatsRDPMC": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_most_simd_backends,
+    #     measurement_region="phase_profile",
+    #     measurement_mode="full_stats_rdpmc",
+    # ),
+    # "CppHEFTmostSIMD_PhaseOnly_TimeOnly": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_most_simd_backends,
+    #     measurement_region="phase_profile",
+    #     measurement_mode="time_only",
+    # ),
+    # "CppHEFTmostSIMD_Kernel_FullStats": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_most_simd_backends,
+    #     measurement_region="kernel_profile",
+    #     measurement_mode="full_stats",
+    # ),
+    # "CppHEFTmostSIMD_Kernel_FullStatsRDPMC": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_most_simd_backends,
+    #     measurement_region="kernel_profile",
+    #     measurement_mode="full_stats_rdpmc",
+    # ),
+    # "CppHEFTmostSIMD_Kernel_TimeOnly": CppHeftScheduler(
+    #     backend_configuration=cpp_heft_most_simd_backends,
+    #     measurement_region="kernel_profile",
+    #     measurement_mode="time_only",
+    # ),
+    
     "CppHEFTallCPU_Kernel_FullStatsRDPMC": CppHeftScheduler(
         backend_configuration=cpp_heft_all_cpu_backends,
         measurement_region="kernel_profile",
         measurement_mode="full_stats_rdpmc",
     ),
-    "CppHEFTallCPU_Kernel_TimeOnly": CppHeftScheduler(
-        backend_configuration=cpp_heft_all_cpu_backends,
-        measurement_region="kernel_profile",
-        measurement_mode="time_only",
-    ),
-    "CppHEFTmostSIMD_PhaseOnly_FullStats": CppHeftScheduler(
-        backend_configuration=cpp_heft_most_simd_backends,
-        measurement_region="phase_profile",
-        measurement_mode="full_stats",
-    ),
-    "CppHEFTmostSIMD_PhaseOnly_FullStatsRDPMC": CppHeftScheduler(
-        backend_configuration=cpp_heft_most_simd_backends,
-        measurement_region="phase_profile",
-        measurement_mode="full_stats_rdpmc",
-    ),
-    "CppHEFTmostSIMD_PhaseOnly_TimeOnly": CppHeftScheduler(
-        backend_configuration=cpp_heft_most_simd_backends,
-        measurement_region="phase_profile",
-        measurement_mode="time_only",
-    ),
-    "CppHEFTmostSIMD_Kernel_FullStats": CppHeftScheduler(
-        backend_configuration=cpp_heft_most_simd_backends,
-        measurement_region="kernel_profile",
-        measurement_mode="full_stats",
-    ),
-    "CppHEFTmostSIMD_Kernel_FullStatsRDPMC": CppHeftScheduler(
-        backend_configuration=cpp_heft_most_simd_backends,
+    "CppHEFToptimize_eft_FullStatsRDPMC": CppHeftScheduler(
+        backend_configuration=cpp_heft_cpu_eftOptimized_backends,
         measurement_region="kernel_profile",
         measurement_mode="full_stats_rdpmc",
-    ),
-    "CppHEFTmostSIMD_Kernel_TimeOnly": CppHeftScheduler(
-        backend_configuration=cpp_heft_most_simd_backends,
-        measurement_region="kernel_profile",
-        measurement_mode="time_only",
     ),
 }
 
