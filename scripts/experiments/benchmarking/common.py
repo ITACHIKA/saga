@@ -27,22 +27,32 @@ logging.basicConfig(level=logging.ERROR)
 
 thisdir = pathlib.Path(__file__).parent.resolve()
 
-cpp_heft_all_cpu_backends = ["cpu"] * 7
-cpp_heft_cpu_eftOptimized_backends = [
+# Seven slots: avg-comp, inverse-comm-speed, avg-comm, upward-rank,
+# parent-max, placement strategy, argmin. Slot 5 controls BOTH EFT and commit.
+# Placement values: array_cpu, array_cpu_optimized, avl_cpu.
+# Legacy cpu/cpu_optimized are still accepted by the Python wrapper in slot 5.
+cpp_heft_all_cpu_backends = [
+    "cpu", "cpu", "cpu", "cpu", "cpu", "array_cpu", "cpu",
+]
+cpp_heft_array_optimized_backends = [
     "cpu",
     "cpu",
     "cpu",
     "cpu",
     "cpu",
-    "cpu_optimized",
-    "cpu",]
+    "array_cpu_optimized",
+    "cpu",
+]
+cpp_heft_avl_backends = [
+    "cpu", "cpu", "cpu", "cpu", "cpu", "avl_cpu", "cpu",
+]
 cpp_heft_most_simd_backends = [
     "simd",
     "simd",
     "simd",
     "cpu",
     "simd",
-    "cpu",
+    "array_cpu",
     "simd",
 ]
 
@@ -127,13 +137,24 @@ saga_schedulers = {
     #     measurement_mode="time_only",
     # ),
     
+    # Keep distinct registration names for each placement strategy: run.py's
+    # resume check and performance output paths are keyed by scheduler name.
+    # Use matching region/mode settings when comparing the three strategies.
     "CppHEFTallCPU_Kernel_FullStatsRDPMC": CppHeftScheduler(
+        scheduler_name="CppHEFTallCPU_Kernel_FullStatsRDPMC",
         backend_configuration=cpp_heft_all_cpu_backends,
         measurement_region="kernel_profile",
         measurement_mode="full_stats_rdpmc",
     ),
     "CppHEFToptimize_eft_FullStatsRDPMC": CppHeftScheduler(
-        backend_configuration=cpp_heft_cpu_eftOptimized_backends,
+        scheduler_name="CppHEFToptimize_eft_FullStatsRDPMC",
+        backend_configuration=cpp_heft_array_optimized_backends,
+        measurement_region="kernel_profile",
+        measurement_mode="full_stats_rdpmc",
+    ),
+    "CppHEFT_AVL_Kernel_FullStatsRDPMC": CppHeftScheduler(
+        scheduler_name="CppHEFT_AVL_Kernel_FullStatsRDPMC",
+        backend_configuration=cpp_heft_avl_backends,
         measurement_region="kernel_profile",
         measurement_mode="full_stats_rdpmc",
     ),

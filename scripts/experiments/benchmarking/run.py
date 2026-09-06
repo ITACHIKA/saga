@@ -15,6 +15,8 @@ from common import (
 )
 from tqdm import tqdm
 
+from sagaWrapperPython import CppHeftScheduler
+
 from saga import Scheduler
 from saga.schedulers.data import Dataset
 
@@ -71,7 +73,9 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
                         scheduler_name,
                     )
                     continue
-        if("CppHEFT" in scheduler_name): # special case for CppHEFT schedulers to allow extra params
+        # Placement is carried by the adapter's seven-slot configuration.
+        # Pass run metadata for every C++ adapter, regardless of its display name.
+        if isinstance(scheduler, CppHeftScheduler):
             extra_params = {}
             extra_params["dataset_name"] = dataset_name
             extra_params["instance_name"] = instance_name
