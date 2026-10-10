@@ -136,7 +136,7 @@ saga_schedulers = {
     #     measurement_region="kernel_profile",
     #     measurement_mode="time_only",
     # ),
-    
+
     # Keep distinct registration names for each placement strategy: run.py's
     # resume check and performance output paths are keyed by scheduler name.
     # Use matching region/mode settings when comparing the three strategies.
@@ -159,6 +159,23 @@ saga_schedulers = {
         measurement_mode="full_stats_rdpmc",
     ),
 }
+
+# The Verilator extension is an optional Linux/WSL build. Add its complete
+# Phase 2 engine to a benchmark run only when explicitly requested; importing
+# common.py must remain usable with a CPU-only sagaWrapper build.
+if os.environ.get("SAGA_ENABLE_VERILATOR_PHASE2", "").lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}:
+    saga_schedulers["CppHEFT_Verilator_Phase2Cycles"] = CppHeftScheduler(
+        scheduler_name="CppHEFT_Verilator_Phase2Cycles",
+        backend_configuration=cpp_heft_all_cpu_backends,
+        measurement_region="phase_profile",
+        measurement_mode="time_only",
+        phase2_backend="verilator",
+    )
 
 exclude_datasets: Set[str] = {
     "bwa",

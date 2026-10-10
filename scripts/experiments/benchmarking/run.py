@@ -20,11 +20,29 @@ from sagaWrapperPython import CppHeftScheduler
 from saga import Scheduler
 from saga.schedulers.data import Dataset
 
-import pdb
-
 # Global variables for worker processes
 _worker_resultsdir: pathlib.Path
 _worker_schedulers: Dict[str, Scheduler]
+
+RTL_METRIC_COLUMNS = {
+    "cycles": "RTL Cycles",
+    "parent_stalls": "RTL Parent Stalls",
+    "commit_stalls": "RTL Commit Stalls",
+    "forward_hits": "RTL Forward Hits",
+    "overlap_cycles": "RTL Overlap Cycles",
+    "scan_records": "RTL Scan Records",
+    "shift_records": "RTL Shift Records",
+}
+RESULT_COLUMNS = [
+    "Dataset",
+    "Instance",
+    "Scheduler",
+    "Repeat",
+    "Makespan",
+    "Phase2 Backend",
+    *RTL_METRIC_COLUMNS.values(),
+]
+
 
 def _init_worker(results_dir: pathlib.Path, schedulers: Dict[str, Scheduler]):
     """Initialize worker process with shared state."""
@@ -52,7 +70,9 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
 
     results = []
     for scheduler_name, scheduler in _worker_schedulers.items():
-        schedules = [] # use a list to store the current scheduler's repeated runs
+        # Capture backend counters immediately after each repeated schedule call:
+        # CppHeftScheduler.last_backend_metrics describes only the latest call.
+        schedule_runs = []
         current_results = []
         # Check if already finished (with lock to avoid race condition)
         with filelock.FileLock(lock_path):
@@ -80,20 +100,24 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
             extra_params["dataset_name"] = dataset_name
             extra_params["instance_name"] = instance_name
             extra_params["scheduler_name"] = scheduler_name
-            for i in range(1,cpp_heft_repeats+1):
+            for i in range(1, cpp_heft_repeats + 1):
                 extra_params["repeats_id"] = i
-                schedules.append(scheduler.schedule(
-                    network=instance.network, task_graph=instance.task_graph, extra_param = extra_params
-                ))
+                schedule = scheduler.schedule(
+                    network=instance.network,
+                    task_graph=instance.task_graph,
+                    extra_param=extra_params,
+                )
+                schedule_runs.append((schedule, scheduler.last_backend_metrics))
         else:
-            schedules.append(scheduler.schedule(
+            schedule = scheduler.schedule(
                 network=instance.network, task_graph=instance.task_graph
-            ))
+            )
+            schedule_runs.append((schedule, {}))
         # print(scheduler_name)
         # pdb.set_trace()
         # schedule = CppHeftScheduler().schedule(
         #     network=instance.network, task_graph=instance.task_graph)
-        for repeat_id, schedule in enumerate(schedules, start=1):
+        for repeat_id, (schedule, backend_metrics) in enumerate(schedule_runs, start=1):
             makespan = schedule.makespan
             result = {
                 "Dataset": dataset_name,
@@ -101,15 +125,36 @@ def _evaluate_instance(args: Tuple[str, str]) -> List[Dict]:
                 "Scheduler": scheduler_name,
                 "Repeat": repeat_id,
                 "Makespan": makespan,
+                "Phase2 Backend": backend_metrics.get(
+                    "backend", getattr(scheduler, "phase2_backend", None)
+                ),
             }
+            for metric_name, column_name in RTL_METRIC_COLUMNS.items():
+                result[column_name] = backend_metrics.get(metric_name)
             results.append(result)
             current_results.append(result)
 
         # Write result immediately with lock
         with filelock.FileLock(lock_path):
-            result_df = pd.DataFrame(current_results)
+            result_df = pd.DataFrame(current_results, columns=RESULT_COLUMNS)
             if savepath.exists():
-                result_df.to_csv(savepath, mode="a", header=False, index=False)
+                # Migrate an older five-column benchmark file before appending.
+                # Without this, header-less CSV append would shift new values
+                # into the wrong columns.
+                existing_df = pd.read_csv(savepath)
+                existing_columns = list(existing_df.columns)
+                output_columns = existing_columns + [
+                    column
+                    for column in RESULT_COLUMNS
+                    if column not in existing_columns
+                ]
+                if output_columns != existing_columns:
+                    existing_df.reindex(columns=output_columns).to_csv(
+                        savepath, index=False
+                    )
+                result_df.reindex(columns=output_columns).to_csv(
+                    savepath, mode="a", header=False, index=False
+                )
             else:
                 result_df.to_csv(savepath, index=False)
 
@@ -173,7 +218,7 @@ def evaluate_dataset(
     #             unit="instance",
     #         )
     #     )
-    
+
     # Serial execution for debugging
     _init_worker(resultsdir, schedulers)
     list(
