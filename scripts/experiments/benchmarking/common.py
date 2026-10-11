@@ -158,6 +158,13 @@ saga_schedulers = {
         measurement_region="kernel_profile",
         measurement_mode="full_stats_rdpmc",
     ),
+    # "CppHEFT_Verilator_Phase2Cycles": CppHeftScheduler(
+    #     scheduler_name="CppHEFT_Verilator_Phase2Cycles",
+    #     backend_configuration=cpp_heft_all_cpu_backends,
+    #     measurement_region="phase_profile",
+    #     measurement_mode="time_only",
+    #     phase2_backend="verilator",
+    # ),
 }
 
 # Register the complete RTL Phase 2 backend explicitly in saga_schedulers when
